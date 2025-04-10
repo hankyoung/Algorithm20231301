@@ -1,0 +1,43 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <stdexcept>
+#include <algorithm>
+
+std::vector<int> make_vector(int size) { //generate vector of random size
+    std::vector<int> input_list(size);
+    for (int& x : input_list) {
+        x = rand() % 10001;  // random number from 0~10^6
+    }
+    return input_list;
+}
+
+void bubble_sort(std::vector<int>& list) { //bubble_sort implementaion
+    bool is_swapped = false;
+    for(int times = 0; times < list.size()-1; times++) {
+        for(int i = 0; i < list.size() - 1; i++) {
+            if(list[i] > list[i+1]) {
+                std::swap(list[i], list[i+1]);
+                is_swapped = true;
+            }
+        }
+        if(is_swapped == false) {
+            break;
+        }
+    }
+
+} 
+
+
+
+
+int main() {
+    int size;
+    std::cin >> size;
+    std::vector<int> input = make_vector(size);
+    bubble_sort(input);
+    for(int i = 0; i < size; i++) {
+        std::cout << input[i] << std::endl;
+    }
+    return 0;
+}
