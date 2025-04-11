@@ -12,6 +12,17 @@ std::vector<int> make_vector(int size) { //generate vector of random size
     return input_list;
 }
 
+bool is_sorted(std::vector<int>& list) {
+    for(int i = 0; i < list.size() - 1; i++) {
+        if (list[i] > list[i+1]) {
+            std::cout << "error" << std::endl;
+            return false;
+        }
+    }
+    std::cout << "sorted!" << std::endl;
+    return true;
+}
+
 void bubble_sort(std::vector<int>& list) { //bubble_sort implementaion
     bool is_swapped = false;
     for(int times = 0; times < list.size()-1; times++) {
@@ -36,8 +47,6 @@ int main() {
     std::cin >> size;
     std::vector<int> input = make_vector(size);
     bubble_sort(input);
-    for(int i = 0; i < size; i++) {
-        std::cout << input[i] << std::endl;
-    }
+    is_sorted(input);
     return 0;
 }
