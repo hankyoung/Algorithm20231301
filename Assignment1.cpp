@@ -3,6 +3,7 @@
 #include <random>
 #include <stdexcept>
 #include <algorithm>
+#include <chrono>
 
 std::vector<int> make_vector(int size) { //generate vector of random size
     std::vector<int> input_list(size);
@@ -46,7 +47,11 @@ int main() {
     int size;
     std::cin >> size;
     std::vector<int> input = make_vector(size);
+    auto start = std::chrono::high_resolution_clock::now();
     bubble_sort(input);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::milli>(end - start).count();
+    std::cout << "Execution time: " << duration << " ms\n";
     is_sorted(input);
     return 0;
 }
