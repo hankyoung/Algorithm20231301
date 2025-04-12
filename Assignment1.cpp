@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <chrono>
+#include <climits>
 
 std::vector<int> make_vector(int size) { //generate vector of random size
     std::vector<int> input_list(size);
@@ -24,8 +25,7 @@ bool is_sorted(std::vector<int>& list) {
     return true;
 }
 
-void bubble_sort(std::vector<int>& list) { //bubble_sort implementaion
-    bool is_swapped = false;
+void bubble_sort(std::vector<int>& list) { 
     for(int times = 0; times < list.size()-1; times++) {
         for(int i = 0; i < list.size() - 1; i++) {
             if(list[i] > list[i+1]) {
@@ -40,6 +40,23 @@ void bubble_sort(std::vector<int>& list) { //bubble_sort implementaion
 
 } 
 
+void selection_sort(std::vector<int>& list) {
+    int start = 0;
+    while(start < list.size()) {
+        int min_index = start;
+        int min = INT_MAX;
+        for(int i = start; i < list.size(); i++) {
+            if (list[i] < min) {\
+                min = list[i];      
+                min_index = i;
+            }
+        }
+        std::swap(list[start], list[min_index]);
+        start++;
+    }
+}
+
+
 
 
 
@@ -48,7 +65,7 @@ int main() {
     std::cin >> size;
     std::vector<int> input = make_vector(size);
     auto start = std::chrono::high_resolution_clock::now();
-    bubble_sort(input);
+    selection_sort(input);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Execution time: " << duration << " ms\n";
