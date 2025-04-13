@@ -11,7 +11,7 @@
 std::vector<int> make_random_vector(int size) { //generate vector of random size
     std::vector<int> input_list(size);
     for (int& x : input_list) {
-        x = rand() % 10001;  // random number from 0~10^6
+        x = rand() % 1000001;  // random number from 0~10^6
     }
     return input_list;
 }
@@ -50,7 +50,6 @@ void bubble_sort(std::vector<int>& list) {
             break;
         }
     }
-
 } 
 
 void selection_sort(std::vector<int>& list) {
@@ -205,14 +204,42 @@ void heap_sort(std::vector<int>& list) {
     }
 }
 
-
+void cocktail_shaker_sort(std::vector<int>& list) { 
+    bool is_swapped = true;
+    int start = 0;
+    int end = list.size() - 1;
+    int times = 1;
+    while(is_swapped == true) {
+        is_swapped = false;
+        if(times % 2 == 1) {
+            for(int i = start; i < end; i++) {
+                if (list[i] > list[i+1]) {
+                    std::swap(list[i], list[i+1]);
+                    is_swapped = true;
+                }
+            }
+            times++;
+            end--;
+        }
+        else {
+            for(int i = end; i > start; i--) {
+                if(list[i] < list[i-1]) {
+                    std::swap(list[i], list[i-1]);
+                    is_swapped = true;
+                }
+            }
+            times++;
+            start++;
+        }    
+    }
+} 
 
 int main() {
     int size;
     std::cin >> size;
     std::vector<int> input = make_random_vector(size);
     auto start = std::chrono::high_resolution_clock::now();
-    heap_sort(input);
+    cocktail_shaker_sort(input);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Execution time: " << duration << " ms\n";
