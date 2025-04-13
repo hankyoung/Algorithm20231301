@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <chrono>
 #include <climits>
-#include <utility>
+#include <tuple>
+#include <algorithm>
 
 std::vector<int> make_random_vector(int size) { //generate vector of random size
     std::vector<int> input_list(size);
@@ -130,11 +131,10 @@ void merge_sort(std::vector<int>& list) {
     list = merged_vector;
 }
 
-std::vector<int> quick_partition(std::vector<int> list) {
+std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> quick_partition(std::vector<int> list) {
     std::vector<int> small;
     std::vector<int> big;
     std::vector<int> equal;
-    std::vector<int> merged_vector;
     int pivot = list[rand() % list.size()];
 
     for(int& x : list) {
@@ -148,32 +148,71 @@ std::vector<int> quick_partition(std::vector<int> list) {
             equal.push_back(x);
         }
     }
-
-    for(int& i : small) {
-        merged_vector.push_back(i);
-    }
-
-    for(int& i : equal) {
-        merged_vector.push_back(i);
-    }
-
-    for(int& i : big) {
-        merged_vector.push_back(i);
-    }
-
-    return merged_vector;
+    return std::make_tuple(small, equal, big);
 }
 
 void quick_sort(std::vector<int>& list) {
+    if (list.size() <= 1) {
+        return;
+    }
+    std::vector<int> small, equal, big;
+    std::tie(small, equal, big) = quick_partition(list);
+    quick_sort(small);
+    quick_sort(big);
+    list.clear();
 
+    for (int& x: small) {
+        list.push_back(x);
+    }
+
+    for (int& x: equal) {
+        list.push_back(x);
+    }
+
+    for (int& x: big) {
+        list.push_back(x);
+    }
 }
+
+void heapify(std::vector<int>& list, int i, int size) {
+    int max_index = i;
+    if (2 * i + 1 < size && list[max_index] < list[2 * i + 1]) {
+        max_index = 2 * i + 1;
+    }
+    if (2 * i + 2  < size && list[max_index] < list[2 * i + 2]) {
+        max_index = 2 * i + 2;
+    }
+
+    if(i != max_index) {
+        std::swap(list[i], list[max_index]);
+        heapify(list, max_index, size);
+    }
+}
+
+void build_max_heap(std::vector<int>& list, int size) {
+    for(int i = (size / 2) - 1 ; i >= 0; i--) {
+        heapify(list, i, size);
+    }
+}
+
+void heap_sort(std::vector<int>& list) {
+    int size = list.size();
+    build_max_heap(list, size);
+    while (size > 1) {
+        std::swap(list[0], list[size-1]);
+        size --;
+        heapify(list, 0, size);
+    }
+}
+
+
 
 int main() {
     int size;
     std::cin >> size;
     std::vector<int> input = make_random_vector(size);
     auto start = std::chrono::high_resolution_clock::now();
-    merge_sort(input);
+    heap_sort(input);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Execution time: " << duration << " ms\n";
