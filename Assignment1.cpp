@@ -6,7 +6,6 @@
 #include <chrono>
 #include <climits>
 #include <tuple>
-#include <algorithm>
 
 std::vector<int> make_random_vector(int size) { //generate vector of random size
     std::vector<int> input_list(size);
@@ -58,7 +57,7 @@ void selection_sort(std::vector<int>& list) {
         int min_index = start;
         int min = INT_MAX;
         for(int i = start; i < list.size(); i++) {
-            if (list[i] < min) {\
+            if (list[i] < min) {
                 min = list[i];      
                 min_index = i;
             }
@@ -204,6 +203,10 @@ void heap_sort(std::vector<int>& list) {
     }
 }
 
+/* pseudocode of cocktail_shaker_sort
+
+    to be filled
+*/
 void cocktail_shaker_sort(std::vector<int>& list) { 
     bool is_swapped = true;
     int start = 0;
@@ -234,15 +237,168 @@ void cocktail_shaker_sort(std::vector<int>& list) {
     }
 } 
 
+
+/*pseudocode of comb_sort
+
+to be filled
+
+
+*/
+void comb_sort(std::vector<int>& list) {
+    int gap = list.size();
+    double shrink_factor = 1.3;
+    bool is_swapped = true;
+
+    while(gap > 1 || is_swapped == true) {
+        is_swapped = false;
+        for(int i = 0; i + gap < list.size(); i += gap) {
+            if(list[i] > list[i + gap]) {
+                std::swap(list[i], list[i + gap]);
+                is_swapped = true;
+            }
+        }
+        gap = gap / shrink_factor;
+        if(gap < 1) {
+            gap = 1;
+        }
+    }
+}
+
+int find_insert_position(const std::vector<int>& big_list, int value) {
+    int low = 0;
+    int high = big_list.size() - 1;
+
+    while (low <= high) {
+        int mid = (low + high) / 2;
+        int actual_mid = mid;
+
+        if (big_list[mid] == INT_MIN) {
+            int left = mid - 1;
+            int right = mid + 1;
+            bool found = false;
+
+            while (left >= low || right <= high) {
+                if (left >= low && big_list[left] != INT_MIN) {
+                    actual_mid = left;
+                    found = true;
+                    break;
+                }
+                if (right <= high && big_list[right] != INT_MIN) {
+                    actual_mid = right;
+                    found = true;
+                    break;
+                }
+                left--;
+                right++;
+            }
+
+            if (found == false) {
+                break; 
+            }
+        }
+
+        if (value < big_list[actual_mid]) {
+            high = actual_mid - 1;
+        } else {
+            low = actual_mid + 1;
+        }
+    }
+    return low;
+}
+
+std::pair<std::string, int> find_nearest_empty(const std::vector<int>& big_list, int insert_idx) {
+    int left = insert_idx - 1;
+    int right = insert_idx + 1;
+
+    while (left >= 0 || right < big_list.size()) {
+        if (right < big_list.size() && big_list[right] == INT_MIN){
+            return std::make_pair("right", right);
+
+        }
+
+        if (left >= 0 && big_list[left] == INT_MIN) {
+            return std::make_pair("left", left);
+        }
+
+        left--;
+        right++;
+    }
+    return std::make_pair("none", -1);
+}
+
+
+std::vector<int> library_sort(std::vector<int>& list) {
+    double space_factor = 2.0;
+    std::vector<int> big_list((int)(space_factor * list.size()), INT_MIN);
+    int insert_index = find_insert_position(big_list, list[0]);
+    big_list[insert_index] = list[0];
+
+    for (int i = 1; i < list.size(); i++) {
+        int index = find_insert_position(big_list, list[i]);
+        if (big_list[index] == INT_MIN) {
+            big_list[index] = list[i];
+        }
+        else {
+            std::pair<std::string, int> result = find_nearest_empty(big_list, index);
+            std::string direction = result.first;
+            int empty_idx = result.second;
+
+            if (result.first == "none") {
+                std::cerr << "Failed to insert element: no space left\n";
+                continue;
+            }
+
+            if (direction == "right") {
+                for (int j = empty_idx; j > index; j--) {
+                    big_list[j] = big_list[j - 1];
+                }
+                big_list[index] = list[i];
+            }
+
+            else if (direction == "left") {
+                for(int j = empty_idx; j < index; j++) {
+                    big_list[j] = big_list[j + 1];
+                }
+                big_list[empty_idx] = list[i];
+            }
+        }
+    }
+
+    std::vector<int> result;
+    for (int x : big_list) {
+        if (x != INT_MIN) {
+            result.push_back(x);
+        }
+    }
+    return result;
+}
+
+std::vector<int> build_tree(std::vector<int>& list) {
+    std::vector<int> tree(2 * list.size() - 1);
+    for (int i = 0; i < list.size(); i++) {
+        tree[list.size() - 1 + i] = list[i];   
+    }
+
+    for (int i = list.size() - 2; i >= 0; i--) {
+        tree[i] = std::min(tree[2 * i + 1], tree[2 * i + 2]);
+    }
+    return tree;
+} 
+
+std::vector<int> tournament_sort(std::vector<int>& list) {
+    std::vector<int> tree = build_tree(list);
+}
 int main() {
     int size;
     std::cin >> size;
     std::vector<int> input = make_random_vector(size);
+
     auto start = std::chrono::high_resolution_clock::now();
-    cocktail_shaker_sort(input);
+    std::vector<int> result = library_sort(input);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Execution time: " << duration << " ms\n";
-    is_sorted(input);
+    is_sorted(result);
+
     return 0;
 }
