@@ -83,8 +83,22 @@ def prim(dist):
 
     return mst_edges
 
+def find_odd_degree(mst, n):
+    degree = [0] * n
+    odd_vertices = []
+
+    for u, v in mst:
+        degree[u] += 1
+        degree[v] += 1
+
+    for i in range(n):
+        if degree[i] % 2 == 1:
+            odd_vertices.append(i)
+
+    return odd_vertices
 
 
 dist_matrix = parse_tsp_file("a280.tsp")
 mst = prim(dist_matrix)
-print(mst)
+vertices = find_odd_degree(mst, 280)
+print(vertices, len(vertices))
