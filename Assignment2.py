@@ -1,4 +1,4 @@
-def parse_tsp_file(filepath): #parsing tsp file to distmatrix
+def parse_tsp_file(filepath): #parsing tsp file to dist_matrix
     with open(filepath, 'r') as f:
         lines = f.readlines()
 
@@ -52,7 +52,39 @@ def held_karp(dist):
 
     return min_distance
 
+def prim(dist):
+    n = len(dist)
+    in_mst = [False] * n
+    min_edge = [float('inf')] * n
+    min_edge[0] = 0
+    parent = [-1] * n
+    mst_edges = []
 
-dist_matrix = parse_tsp_file("small1.tsp")
-result = held_karp(dist_matrix)
-print(result)
+    for i in range(n):
+        u = -1
+        min_cost = float('inf')
+        for v in range(n):
+            if not in_mst[v] and min_edge[v] < min_cost:
+                min_cost = min_edge[v]
+                u = v
+
+        if u == -1:
+            break
+
+        in_mst[u] = True
+
+        if parent[u] != -1:
+            mst_edges.append((parent[u], u))
+
+        for v in range(n):
+            if not in_mst[v] and dist[u][v] < min_edge[v]:
+                min_edge[v] = dist[u][v]
+                parent[v] = u
+
+    return mst_edges
+
+
+
+dist_matrix = parse_tsp_file("a280.tsp")
+mst = prim(dist_matrix)
+print(mst)
