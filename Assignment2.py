@@ -97,8 +97,97 @@ def find_odd_degree(mst, n):
 
     return odd_vertices
 
+def greedy_matching(odd_vertices, dist):
+    unmatched = odd_vertices[:]  # 복사
+    result = []
 
-dist_matrix = parse_tsp_file("a280.tsp")
+    while unmatched:
+        u = unmatched[0]
+        min_dist = float('inf')
+        min_v = -1
+
+        for i in range(1, len(unmatched)):
+            v = unmatched[i]
+            if dist[u][v] < min_dist:
+                min_dist = dist[u][v]
+                min_v = v
+
+        result.append((u, min_v))
+        unmatched.remove(u)
+        unmatched.remove(min_v)
+
+    return result
+
+def build_multigraph(mst_edges, matching_edges):
+    graph = {}
+    for u, v in mst_edges + matching_edges:
+        if u not in graph:
+            graph[u] = []
+        if v not in graph:
+            graph[v] = []
+        graph[u].append(v)
+        graph[v].append(u)
+    return graph
+
+def find_eulerian_circuit(graph):
+    circuit = []
+    stack = []
+
+    # 아무 노드나 시작점 (첫 번째 키 선택)
+    for node in graph:
+        if graph[node]:  # 연결된 간선이 있다면
+            stack.append(node)
+            break
+
+    # 깊은 복사 없이 직접 제거 → 원본 graph가 변해도 괜찮다면 OK
+    while stack:
+        u = stack[-1]
+        if graph[u]:
+            v = graph[u].pop()
+            graph[v].remove(u)
+            stack.append(v)
+        else:
+            circuit.append(stack.pop())
+
+    return circuit[::-1]
+
+def euler_to_tsp_path(euler_circuit):
+    max_index = max(euler_circuit)
+    visited = [False] * (max_index + 1)
+    tsp_path = []
+
+    for node in euler_circuit:
+        if not visited[node]:
+            visited[node] = True
+            tsp_path.append(node)
+
+    tsp_path.append(tsp_path[0])  # 시작점으로 돌아감
+    return tsp_path
+
+
+def calculate_tour_length(path, dist_matrix):
+    total = 0
+    for i in range(1, len(path)):
+        total += dist_matrix[path[i-1]][path[i]]
+    return total
+
+
+
+# test
+dist_matrix = parse_tsp_file("xql662.tsp")
+
 mst = prim(dist_matrix)
-vertices = find_odd_degree(mst, 280)
-print(vertices, len(vertices))
+
+odd_vertices = find_odd_degree(mst, len(dist_matrix))
+
+matching = greedy_matching(odd_vertices, dist_matrix)
+
+multigraph = build_multigraph(mst, matching)
+
+euler_circuit = find_eulerian_circuit(multigraph)
+
+tsp_path = euler_to_tsp_path(euler_circuit)
+print("TSP Path:", tsp_path)
+
+tour_length = calculate_tour_length(tsp_path, dist_matrix)
+print("Total Tour Length:", tour_length)
