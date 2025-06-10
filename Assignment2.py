@@ -52,7 +52,7 @@ def held_karp(dist):
 
     return min_distance
 
-def prim(dist):
+def prim(dist): #make mst
     n = len(dist)
     in_mst = [False] * n
     min_edge = [float('inf')] * n
@@ -83,7 +83,7 @@ def prim(dist):
 
     return mst_edges
 
-def find_odd_degree(mst, n):
+def find_odd_degree(mst, n): #find vertex with odd degree
     degree = [0] * n
     odd_vertices = []
 
@@ -97,8 +97,8 @@ def find_odd_degree(mst, n):
 
     return odd_vertices
 
-def greedy_matching(odd_vertices, dist):
-    unmatched = odd_vertices[:]  # 복사
+def greedy_matching(odd_vertices, dist): #find perfect matching through greedy
+    unmatched = odd_vertices[:]
     result = []
 
     while unmatched:
@@ -118,7 +118,7 @@ def greedy_matching(odd_vertices, dist):
 
     return result
 
-def build_multigraph(mst_edges, matching_edges):
+def build_multigraph(mst_edges, matching_edges): #euler
     graph = {}
     for u, v in mst_edges + matching_edges:
         if u not in graph:
@@ -133,13 +133,11 @@ def find_eulerian_circuit(graph):
     circuit = []
     stack = []
 
-    # 아무 노드나 시작점 (첫 번째 키 선택)
     for node in graph:
-        if graph[node]:  # 연결된 간선이 있다면
+        if graph[node]:
             stack.append(node)
             break
 
-    # 깊은 복사 없이 직접 제거 → 원본 graph가 변해도 괜찮다면 OK
     while stack:
         u = stack[-1]
         if graph[u]:
@@ -151,7 +149,7 @@ def find_eulerian_circuit(graph):
 
     return circuit[::-1]
 
-def euler_to_tsp_path(euler_circuit):
+def euler_to_tsp_path(euler_circuit): #hamilton
     max_index = max(euler_circuit)
     visited = [False] * (max_index + 1)
     tsp_path = []
@@ -161,11 +159,11 @@ def euler_to_tsp_path(euler_circuit):
             visited[node] = True
             tsp_path.append(node)
 
-    tsp_path.append(tsp_path[0])  # 시작점으로 돌아감
+    tsp_path.append(tsp_path[0])
     return tsp_path
 
 
-def calculate_tour_length(path, dist_matrix):
+def calculate_tour_length(path, dist_matrix): #length calculate
     total = 0
     for i in range(1, len(path)):
         total += dist_matrix[path[i-1]][path[i]]

@@ -26,6 +26,27 @@ std::vector<std::pair<int, int>> make_ordered_vector(int size) { //generate orde
     return input_list;
 }
 
+std::vector<std::pair<int, int>> make_partially_ordered_vector(int size, double sorted_ratio) {
+    std::vector<std::pair<int, int>> input_list(size);
+
+    int sorted_size = size * sorted_ratio;
+    int i = 0;
+
+    for (; i < sorted_size; i++) {
+        input_list[i] = {i, i}; 
+    }
+
+    
+    for (; i < size; i++) {
+        int value = rand() % 1000001;
+        input_list[i] = {value, i};
+    }
+
+    std::random_shuffle(input_list.begin(), input_list.end());
+
+    return input_list;
+}
+
 void bubble_sort(std::vector<std::pair<int, int>>& list) { 
     bool is_swapped = false;
     for(int times = 0; times < list.size()-1; times++) {
@@ -192,11 +213,7 @@ void heap_sort(std::vector<std::pair<int, int>>& list) {
     }
 }
 
-/* pseudocode of cocktail_shaker_sort
-
-    to be filled
-*/
-void cocktail_shaker_sort(std::vector<int>& list) { 
+void cocktail_shaker_sort(std::vector<std::pair<int, int>>& list) { 
     bool is_swapped = true;
     int start = 0;
     int end = list.size() - 1;
@@ -205,7 +222,7 @@ void cocktail_shaker_sort(std::vector<int>& list) {
         is_swapped = false;
         if(times % 2 == 1) {
             for(int i = start; i < end; i++) {
-                if (list[i] > list[i+1]) {
+                if (list[i].first > list[i+1].first) {
                     std::swap(list[i], list[i+1]);
                     is_swapped = true;
                 }
@@ -215,7 +232,7 @@ void cocktail_shaker_sort(std::vector<int>& list) {
         }
         else {
             for(int i = end; i > start; i--) {
-                if(list[i] < list[i-1]) {
+                if(list[i].first < list[i-1].first) {
                     std::swap(list[i], list[i-1]);
                     is_swapped = true;
                 }
@@ -226,14 +243,7 @@ void cocktail_shaker_sort(std::vector<int>& list) {
     }
 } 
 
-
-/*pseudocode of comb_sort
-
-to be filled
-
-
-*/
-void comb_sort(std::vector<int>& list) {
+void comb_sort(std::vector<std::pair<int, int>>& list) {
     int gap = list.size();
     double shrink_factor = 1.3;
     bool is_swapped = true;
@@ -241,7 +251,7 @@ void comb_sort(std::vector<int>& list) {
     while(gap > 1 || is_swapped == true) {
         is_swapped = false;
         for(int i = 0; i + gap < list.size(); i += gap) {
-            if(list[i] > list[i + gap]) {
+            if(list[i].first > list[i + gap].first) {
                 std::swap(list[i], list[i + gap]);
                 is_swapped = true;
             }
@@ -253,7 +263,7 @@ void comb_sort(std::vector<int>& list) {
     }
 }
 
-int find_insert_position(const std::vector<int>& big_list, int value) {
+int find_insert_position(std::vector<std::pair<int, int>>& big_list, std::pair<int, int> value) {
     int low = 0;
     int high = big_list.size() - 1;
 
@@ -261,18 +271,18 @@ int find_insert_position(const std::vector<int>& big_list, int value) {
         int mid = (low + high) / 2;
         int actual_mid = mid;
 
-        if (big_list[mid] == INT_MIN) {
+        if (big_list[mid].first == INT_MIN) {
             int left = mid - 1;
             int right = mid + 1;
             bool found = false;
 
             while (left >= low || right <= high) {
-                if (left >= low && big_list[left] != INT_MIN) {
+                if (left >= low && big_list[left].first != INT_MIN) {
                     actual_mid = left;
                     found = true;
                     break;
                 }
-                if (right <= high && big_list[right] != INT_MIN) {
+                if (right <= high && big_list[right].first != INT_MIN) {
                     actual_mid = right;
                     found = true;
                     break;
@@ -286,7 +296,7 @@ int find_insert_position(const std::vector<int>& big_list, int value) {
             }
         }
 
-        if (value < big_list[actual_mid]) {
+        if (value.first < big_list[actual_mid].first) {
             high = actual_mid - 1;
         } else {
             low = actual_mid + 1;
@@ -295,17 +305,17 @@ int find_insert_position(const std::vector<int>& big_list, int value) {
     return low;
 }
 
-std::pair<std::string, int> find_nearest_empty(const std::vector<int>& big_list, int insert_idx) {
+std::pair<std::string, int> find_nearest_empty(std::vector<std::pair<int, int>>& big_list, int insert_idx) {
     int left = insert_idx - 1;
     int right = insert_idx + 1;
 
     while (left >= 0 || right < big_list.size()) {
-        if (right < big_list.size() && big_list[right] == INT_MIN){
+        if (right < big_list.size() && big_list[right].first == INT_MIN){
             return std::make_pair("right", right);
 
         }
 
-        if (left >= 0 && big_list[left] == INT_MIN) {
+        if (left >= 0 && big_list[left].first == INT_MIN) {
             return std::make_pair("left", left);
         }
 
@@ -316,15 +326,15 @@ std::pair<std::string, int> find_nearest_empty(const std::vector<int>& big_list,
 }
 
 
-std::vector<int> library_sort(std::vector<int>& list) {
-    double space_factor = 2.0;
-    std::vector<int> big_list((int)(space_factor * list.size()), INT_MIN);
+std::vector<std::pair<int, int>> library_sort(std::vector<std::pair<int, int>>& list) {
+    double space_factor = 4.0;
+    std::vector<std::pair<int, int>> big_list((int)(space_factor * list.size()), {INT_MIN, 0});
     int insert_index = find_insert_position(big_list, list[0]);
     big_list[insert_index] = list[0];
 
     for (int i = 1; i < list.size(); i++) {
         int index = find_insert_position(big_list, list[i]);
-        if (big_list[index] == INT_MIN) {
+        if (big_list[index].first == INT_MIN) {
             big_list[index] = list[i];
         }
         else {
@@ -353,17 +363,17 @@ std::vector<int> library_sort(std::vector<int>& list) {
         }
     }
 
-    std::vector<int> result;
-    for (int x : big_list) {
-        if (x != INT_MIN) {
+    std::vector<std::pair<int, int>> result;
+    for (std::pair<int, int> x : big_list) {
+        if (x.first != INT_MIN) {
             result.push_back(x);
         }
     }
     return result;
 }
 
-std::vector<int> build_tree(std::vector<int>& list) {
-    std::vector<int> tree(2 * list.size() - 1);
+std::vector<std::pair<int, int>> build_tree(std::vector<std::pair<int, int>>& list) {
+    std::vector<std::pair<int, int>> tree(2 * list.size() - 1);
     for (int i = 0; i < list.size(); i++) {
         tree[list.size() - 1 + i] = list[i];   
     }
@@ -374,22 +384,11 @@ std::vector<int> build_tree(std::vector<int>& list) {
     return tree;
 } 
 
-void remove_winner(std::vector<int>& tree) {
-    int winner = tree[0];
-    int start = (tree.size() + 1) / 2 - 1;
-    int index = INT_MIN;
+void remove_winner(std::vector<std::pair<int, int>>& tree) {
+    int n = (tree.size() + 1) / 2; 
+    int index = n - 1 + tree[0].second; 
 
-    for(int i = start; i < tree.size(); i++) {
-        if(tree[i] == winner) {
-            tree[i] = INT_MAX;
-            index = i;
-            break;
-        }
-    }
-
-    if(index == INT_MIN) {
-        return;
-    }
+    tree[index].first = INT_MAX;
 
     while (index > 0) {
         int parent = (index - 1) / 2;
@@ -398,9 +397,9 @@ void remove_winner(std::vector<int>& tree) {
     }
 } 
 
-std::vector<int> tournament_sort(std::vector<int>& list) {
-    std::vector<int> tree = build_tree(list);
-    std::vector<int> result;
+std::vector<std::pair<int, int>> tournament_sort(std::vector<std::pair<int, int>>& list) {
+    std::vector<std::pair<int, int>> tree = build_tree(list);
+    std::vector<std::pair<int, int>> result;
 
     for (int i = 0; i < list.size(); i++) {
         result.push_back(tree[0]);     
@@ -409,59 +408,6 @@ std::vector<int> tournament_sort(std::vector<int>& list) {
 
     return result;
 }
-
-void tim_insertion_sort(std::vector<int>& list, int start, int end) {
-    for (int i = start + 1; i < end; i++) {
-        int key = list[i];
-        int j = i - 1;
-        while (j >= start && list[j] > key) {
-            list[j + 1] = list[j];
-            j--;
-        }
-        list[j + 1] = key;
-    }
-}
-
-std::vector<std::pair<int, int>> extract_runs(const std::vector<int>& arr, int minrun) {
-    std::vector<std::pair<int, int>> runs;
-    int i = 0;
-    while (i < arr.size()) {
-        int start = i;
-        int end = i + 1;
-
-        if (end < arr.size() && arr[end] < arr[start]) {
-            while (end < arr.size() && arr[end] < arr[end - 1]) {
-                end++;
-            }
-
-        } 
-        
-        else {
-            // 오름차순 run
-            while (end < arr.size() && arr[end] >= arr[end - 1]) {
-                end++;
-            }
-        }
-
-        int run_len = end - start;
-
-        // run이 MINRUN보다 짧으면 늘리기 (삽입 정렬 대상)
-        if (run_len < minrun) {
-            int new_end = std::min(start + minrun, (int)arr.size());
-            // 삽입 정렬: insertion_sort(arr, start, new_end);
-            end = new_end;
-        }
-
-        // run 기록
-        runs.push_back({start, end});
-
-        // 다음 run 시작 지점
-        i = end;
-    }
-
-    return runs;
-}
-
 
 bool is_sorted(std::vector<std::pair<int, int>>& list) {
     for(int i = 0; i < list.size() - 1; i++) {
@@ -489,11 +435,15 @@ bool is_stable(std::vector<std::pair<int, int>>& list) {
 
 int main() {
     int size;
+    double sorted_ratio; //for partially sorted data
     std::cin >> size;
+    //std::cin >> sorted_ratio; //for partially sorted data
+
     std::vector<std::pair<int, int>> input = make_random_vector(size);
+    //std::vector<std::pair<int, int>> input = make_partially_ordered_vector(size, sorted_ratio);
 
     auto start = std::chrono::high_resolution_clock::now();
-    heap_sort(input);
+    quick_sort(input);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::milli>(end - start).count();
     std::cout << "Execution time: " << duration << " ms\n";

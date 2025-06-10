@@ -1,0 +1,17 @@
+NAME : small1
+COMMENT : small test data
+TYPE : TSP
+DIMENSION: 10
+EDGE_WEIGHT_TYPE : EUC_2D
+NODE_COORD_SECTION
+  1 18 15
+  2 29 20
+  3 46 28
+  4 47 31
+  5 53 43
+  6 73 55
+  7 76 57
+  8 79 59
+  9 90 62
+ 10 97 72
+ EOF
